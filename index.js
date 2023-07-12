@@ -181,7 +181,7 @@
                                 filter: master_config.user_query.replace('%username%', username),
                                 sizeLimit: 1,
                                 scope: 'sub',
-                                attributes: ['dn', 'sAMAccountName', 'sn', 'mail', 'uid', //these fields are mandatory
+                                attributes: ['dn', 'sAMAccountName', 'sn', 'mail', 'cn', //these fields are mandatory
                                     // optional fields. used to create the user id/fullname
                                     'givenName', 'displayName',
                                 ]
@@ -264,7 +264,7 @@
             winston.verbose("[LDAP] fullname: " + fullname)
             winston.verbose("[LDAP] username: " + username)
             winston.verbose("[LDAP] email: " + email)
-            nodebb_ldap.getUserByLdapUid(profile.uid, (err, dbUser) => {
+            nodebb_ldap.getUserByLdapUid(profile.cn, (err, dbUser) => {
                 if (err) {
                     return callback(err);
                 }
@@ -272,7 +272,7 @@
                     // user exists
                     // now we check the user groups
                     winston.verbose("[LDAP] user exists")
-                    return nodebb_ldap.postLogin(dbUser.uid, profile.uid, callback);
+                    return nodebb_ldap.postLogin(dbUser.uid, profile.cn, callback);
                 } else {
                     // New User
                     winston.verbose("[LDAP] user does not exists")
@@ -296,12 +296,12 @@
                         }
                         await Promise.all([
                             user.setUserFields(uid, {
-                                'nodebbldap:uid:': profile.uid
+                                'nodebbldap:uid:': profile.cn
                             }),
-                            db.setObjectField('ldapid:uid', profile.uid, uid)
+                            db.setObjectField('ldapid:uid', profile.cn, uid)
                         ]);
 
-                        nodebb_ldap.postLogin(uid, profile.uid, callback);
+                        nodebb_ldap.postLogin(uid, profile.cn, callback);
                     });
                 }
             });
@@ -338,11 +338,15 @@
         postLogin: (uid, ldapId, callback) => {
             async.waterfall([
                     function (next) {
-                        if (master_config.registeredGroup === "on") {
-                            nodebb_ldap.joinRegisteredGroup(uid, next);
-                        } else {
-                            next();
-                        }
+                        groups.isMember(uid, "registered")
+                            .then(isMember => {
+                                winston.verbose(`isMember: ${isMember}`)
+                                if (master_config.registeredGroup === "on" && isMember === false) {
+                                    nodebb_ldap.joinRegisteredGroup(uid, next);
+                                } else {
+                                    next();
+                                }
+                            });
                     },
                     nodebb_ldap.findLdapGroups,
                     (groups, callback) => {
