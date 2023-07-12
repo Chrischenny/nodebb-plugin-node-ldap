@@ -1,20 +1,22 @@
 {
-  "name": "@nodebb/nodebb-plugin-node-ldap",
-  "version": "2.0.5",
-  "description": "NodeBB LDAP Login",
+  "name": "@nodebb/nodebb-plugin-node-ldap-ad",
+  "version": "1.0.0",
+  "description": "NodeBB LDAP(Windows AD) Login",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/NodeBB-Community/nodebb-plugin-node-ldap"
+    "url": "https://github.com/Chrischenny/nodebb-plugin-node-ldap-ad"
   },
   "keywords": [
     "nodebb",
     "plugin",
     "ldap",
+    "Windows",
+    "AD",
     "auth"
   ],
   "author": {
-    "name": "csturiale"
+    "name": "Chrischenny"
   },
   "contributors": [
     {
@@ -34,7 +36,7 @@
   "license": "MIT",
   "readmeFilename": "README.md",
   "nbbpm": {
-    "compatibility": "~1.16.0 || ~1.17.0 || ^2.0.0"
+    "compatibility": "~1.16.0 || ~1.17.0 || ^2.0.0 || ^3.0.0"
   },
   "dependencies": {
     "async": "^3.2.0",
